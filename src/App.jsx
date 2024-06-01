@@ -8,13 +8,14 @@ import Home from './Pages/Home';
 import BookSlot from './Pages/BookSlot';
 import Layout from './Pages/Layout';
 import { useSelector } from 'react-redux';
+import Profile from './Pages/Profile';
+import MyBookings from './Pages/MyBookings';
 
 function App() { 
   //useSelector((state) =>state.reducerName.SliceName)
 
   const isAuthenticated = useSelector((state) => state.auth.userAuthCheck);
-  //false; // Replace this with actual authentication check
-console.log(isAuthenticated)
+ //console.log(isAuthenticated)
 
   return (
     <BrowserRouter>
@@ -25,6 +26,8 @@ console.log(isAuthenticated)
         <Route path='/layout' element={<Layout />}>
           <Route path="home" element={ isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
           <Route path="bookslot" element={ isAuthenticated ? <BookSlot /> : <Navigate to="/login" replace />} />
+          <Route path="mybookings" element={ isAuthenticated ? <MyBookings /> : <Navigate to="/login" replace />} />
+          <Route path="profile" element={ isAuthenticated ? <Profile /> : <Navigate to="/login" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>
