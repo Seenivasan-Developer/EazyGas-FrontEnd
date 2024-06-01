@@ -1,0 +1,1 @@
+export const API="https://eazygas-backend.onrender.com"
