@@ -28,12 +28,12 @@ function Login() {
             navigate("/layout/home");
 
         } catch (error) {
-            if (err.response) {
+            if (error.response) {
                 message.error("Invalid Credentials");
-            } else if (err.request) {
+            } else if (error.request) {
                 message.error("Network error, please try again");
             } else {
-                message.error("An error occurred");
+                message.error("Something went wrong, please try again");
             }
             dispatch(authCheck(false));
             form.resetFields(); // Reset the form fields
@@ -101,8 +101,14 @@ function Login() {
                                 Log in
                             </Button>
                             <div disabled={loading} style={{ textAlign: "center", width: "100%" }}>
-                                <Text>Don't have an account?</Text>{" "}
-                                <Link to='/register'>Register now</Link>
+                                <Text disabled={loading}>Don't have an account?</Text>{" "}
+                                <Link
+                                    to={loading ? '#' : '/register'}
+                                    style={{ pointerEvents: loading ? 'none' : 'auto', color: loading ? 'grey' : 'blue' }}
+                                    // onClick={(e) => {
+                                    //     if (loading) e.preventDefault();
+                                    // }}
+                                >Register now</Link>
                             </div>
                         </Form.Item>
                     </Form>

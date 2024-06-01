@@ -105,7 +105,13 @@ export default function Register() {
                                 </Button>
                                 <div style={{ textAlign: "center", width: "100%", paddingBottom: "20px" }}>
                                     <label>Have already an account?</label>{" "}
-                                    <Link to='/'>Login Here</Link>
+                                    <Link
+                                    to={isSubmitting ? '#' : '/'}
+                                    style={{ pointerEvents: isSubmitting ? 'none' : 'auto', color: isSubmitting ? 'grey' : 'blue' }}
+                                    // onClick={(e) => {
+                                    //     if (loading) e.preventDefault();
+                                    // }}
+                                >Login Here</Link>
                                 </div>
                             </Form>
                         </Card>

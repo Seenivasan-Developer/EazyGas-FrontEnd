@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
+import AccountCircle from '@mui/icons-material/AccountCircle';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
@@ -19,6 +19,7 @@ import { authCheck } from '../Redux/authSlice';
 const pages = [
   { name: 'Book Slot', path: '/layout/bookslot' },
   { name: 'My Bookings', path: '/layout/mybookings' },
+  { name: 'Home', path: '/layout/home' },
 ];
 const settings =
   [
@@ -66,13 +67,14 @@ function MenuBar() {
             variant="h6"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="#"
+            onClick={()=>navigate('/layout/home')}
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
               fontFamily: 'monospace',
               fontWeight: 700,
-              letterSpacing: '.3rem',
+              letterSpacing: '.2rem',
               color: 'inherit',
               textDecoration: 'none',
             }}
@@ -121,7 +123,8 @@ function MenuBar() {
             variant="h5"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="#"
+            onClick={()=>navigate('/layout/home')}
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -148,9 +151,9 @@ function MenuBar() {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+            <Tooltip title="User">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}  color="inherit">
+              <AccountCircle />
               </IconButton>
             </Tooltip>
             <Menu
