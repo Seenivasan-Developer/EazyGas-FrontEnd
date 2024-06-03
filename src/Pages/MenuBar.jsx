@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../Redux/authSlice';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import { persistor } from '../Store/Store';
 
 const pages = [
   // { name: 'Book Slot', path: '/layout/bookslot' },
@@ -52,10 +53,16 @@ function MenuBar() {
 
   const handleLogout = React.useCallback(() => {
     // Clear local storage
-    // localStorage.removeItem('user_data');
+     localStorage.removeItem('user_data');
     // Update auth state
     dispatch(logout());
-    // Navigate to login page
+    persistor.purge().then(() => {
+      localStorage.removeItem('persist:root'); // Ensure the persisted state is cleared
+      console.log('Persisted state cleared');
+    }).catch((error) => {
+      console.error('Error purging persistor:', error);
+    });
+     // Navigate to login page
     navigate('/');
   }, [dispatch, navigate]);
 

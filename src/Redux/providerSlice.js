@@ -10,8 +10,7 @@ const providerSlice = createSlice({
     reducers: {
         // action
         providerDetails: (state, action) => {
-            console.log(action.payload)
-            console.log(state.providerdata)
+           state.providerdata=[];
             state.providerdata.push(action.payload);
         }
     }

@@ -11,7 +11,7 @@ const persistConfig = {
   key: 'root',
   storage,
   // Optionally, you can whitelist specific reducers to persist
-  // whitelist: ['auth', 'booking', 'provider'],
+   whitelist: ['auth', 'provider'],
 };
 
 // Combine reducers
@@ -32,7 +32,7 @@ const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore specific actions to prevent serialization errors
-        ignoreActions: [logout.type, 'persist/PERSIST', 'persist/REHYDRATE'],
+        ignoreActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
     }),
 });

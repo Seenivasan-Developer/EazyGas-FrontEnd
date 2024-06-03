@@ -31,7 +31,7 @@ function Home() {
   }).catch ((error)=>{
     console.log(error)
   });
-  }, []);
+  }, [setProviders]);
 
  //handle the search provider
   const handleSearch = (event) => {

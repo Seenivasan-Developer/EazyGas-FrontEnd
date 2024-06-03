@@ -12,6 +12,7 @@ const bookingSlice = createSlice({
         editableBooking: (state, action) => {
             console.log(action.payload)
             console.log(state.editabledata)
+            state.editabledata=[];
             state.editabledata.push(action.payload);
         }
     }
