@@ -58,15 +58,20 @@ console.log(provider)
         paymentMode: values.paymentMode,
         DeliverStatus: "Pending"
       };
-console.log(userDetails);
-console.log(formData)
+      const token=JSON.parse(localStorage.getItem('user_data'))
+      // Define headers
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-auth-token': token.token,
+      // add other headers as needed
+    };
 const formDatawithID={formData:formData,bookingid:bookingData._id};
 console.log(formDatawithID)
       // Make a POST request to your backend API endpoint
-     const res = await axios.post(`${API}/booking/UpdateBookingByID`, formDatawithID);
+     const res = await axios.post(`${API}/booking/UpdateBookingByID`, formDatawithID, { headers: headers });
 
         message.success('Booking Created Successfully');
-       navigate('/layout/home');
+       navigate('/layout/mybookings');
     } catch (error) {
       // Handle any errors
       message.error('Error creating booking:', error);

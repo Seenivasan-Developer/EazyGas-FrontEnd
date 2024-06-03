@@ -29,8 +29,14 @@ const BookSlot = () => {
   //useSelector((state) =>state.reducerName.SliceName)
   const [userDetails]=useSelector((state)=> state.auth.userDetail)
   console.log(userDetails)
-  
-  const { provider } = location.state || {};
+  const token=JSON.parse(localStorage.getItem('user_data'))
+      // Define headers
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-auth-token': token.token,
+      // add other headers as needed
+    };
+    const { provider } = location.state || {};
 
   if (!provider) {
     return <div>No provider data available</div>;
@@ -54,7 +60,7 @@ const BookSlot = () => {
 console.log(userDetails);
 console.log(formData)
       // Make a POST request to your backend API endpoint
-     const res = await axios.post(`${API}/booking/newBooking`, formData);
+     const res = await axios.post(`${API}/booking/newBooking`, formData,{headers:headers});
 
         message.success('Booking Created Successfully');
        navigate('/layout/home');

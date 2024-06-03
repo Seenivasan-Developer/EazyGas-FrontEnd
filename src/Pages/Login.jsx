@@ -16,8 +16,7 @@ function Login() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
-    const [username, setUsername] = useState([]);
-
+  
     const onFinish = async (values) => {
         // console.log(values);
         setLoading(true); //start Loading & disable Form

@@ -26,28 +26,36 @@ const MyBookings = () => {
   const userId = userDetails.id;
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const token = JSON.parse(localStorage.getItem('user_data'))
+  // Define headers
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-auth-token': token.token,
+    // add other headers as needed
+  };
   useEffect(() => {
     axios.get(`${API}/booking/getBookingByUserID`, {
       params: {
         userid: userId,
-      }
+      },
+      headers: headers 
     }).then((res) => {
       setBookings(res.data);
     }).catch((error) => {
       console.log(error.response);
     });
-  }, [userId]);
+  }, [userId]); 
 
   const handleCancel = (booking) => {
     const bookingid = { bookingid: booking._id };
-    axios.post(`${API}/booking/CancelBookingByID`, bookingid).then((res) => {
-      setBookings(prevBookings => 
-        prevBookings.map(b => b._id === booking._id ? { ...b, DeliveryStatus: 'Cancelled' } : b)
-      );
-    }).catch((error) => {
-      console.log(error.response);
-    });
+    axios.post(`${API}/booking/CancelBookingByID`, bookingid,
+      { headers: headers }).then((res) => {
+        setBookings(prevBookings =>
+          prevBookings.map(b => b._id === booking._id ? { ...b, DeliveryStatus: 'Cancelled' } : b)
+        );
+      }).catch((error) => {
+        console.log(error.response);
+      });
   }
 
   const handleEdit = (booking) => {
@@ -105,11 +113,11 @@ const MyBookings = () => {
               </ListItem>
             </List>
           </AccordionDetails>
-          {booking.DeliveryStatus==='Pending'?
-          <AccordionActions>
-            <Button onClick={() => handleCancel(booking)}>Cancel</Button>
-            <Button onClick={() => handleEdit(booking)}>Edit</Button>
-          </AccordionActions>:''}
+          {booking.DeliveryStatus === 'Pending' ?
+            <AccordionActions>
+              <Button onClick={() => handleCancel(booking)}>Cancel</Button>
+              <Button onClick={() => handleEdit(booking)}>Edit</Button>
+            </AccordionActions> : ''}
         </Accordion>
       ))
     );
@@ -128,7 +136,7 @@ const MyBookings = () => {
         <Typography variant="h5" gutterBottom>Cancelled</Typography>
         {renderBookings(cancelledBookings)}
         {cancelledBookings.length === 0 && <Typography>No cancelled bookings.</Typography>}
-        
+
       </Container>
     );
   }

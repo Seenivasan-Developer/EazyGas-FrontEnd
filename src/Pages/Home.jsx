@@ -18,12 +18,15 @@ function Home() {
   console.log(userDetails.userName)
   
   useEffect(() => {
-    // const headers = {
-    //   'x-auth-token': token,
-    //   'Content-Type': 'application/json',
-    // };
+    const token=JSON.parse(localStorage.getItem('user_data'))
+  // Define headers
+const headers = {
+  'Content-Type': 'application/json',
+  'x-auth-token': token.token,
+  // add other headers as needed
+};
       // Add any other headers you need
-    axios.get(`${API}/providers/getAllProviders`).then((res) => {
+    axios.get(`${API}/providers/getAllProviders`,{headers}).then((res) => {
       console.log(res.data);
       setProviders(res.data);
       dispatch(providerDetails(res.data))
