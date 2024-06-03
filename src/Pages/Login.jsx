@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Checkbox, Typography, Card, message } from "antd";
 import { LockOutlined, MobileOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from "react-router-dom";
@@ -6,7 +6,8 @@ import axios from "axios";
 import { API } from "../global";
 import { Paper } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { authCheck } from "../Redux/authSlice";
+import { authCheck, userData } from "../Redux/authSlice";
+import { jwtDecode } from "jwt-decode";
 
 const { Text } = Typography;
 
@@ -14,18 +15,35 @@ function Login() {
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [loading, setLoading]= useState(false);
-
+    const [loading, setLoading] = useState(false);
+    const [username, setUsername] = useState([]);
 
     const onFinish = async (values) => {
         // console.log(values);
         setLoading(true); //start Loading & disable Form
         try {
-            const res = await axios.post(`${API}/users/login`, values, { timeout: 10000 })
+            const res = await axios.post(`${API}/users/login`, values)
             message.success("Login Successful")
             localStorage.setItem("user_data", JSON.stringify(res.data))
             dispatch(authCheck(true));
-            navigate("/layout/home");
+
+            const token = res.data.token;
+
+            console.log(token)
+            if (token) {
+                try {
+                    const decodedToken = jwtDecode(token);
+                    dispatch(userData(decodedToken));
+                    navigate("/layout/home");
+                    // console.log(decodedToken)
+                } catch (error) {
+                    console.error('Invalid token', error);
+                    message.error("Something went Wrong, please try again...")
+                }
+            }
+            else {
+                message.error("Something went Wrong, please try again...")
+            }
 
         } catch (error) {
             if (error.response) {
@@ -105,9 +123,9 @@ function Login() {
                                 <Link
                                     to={loading ? '#' : '/register'}
                                     style={{ pointerEvents: loading ? 'none' : 'auto', color: loading ? 'grey' : 'blue' }}
-                                    // onClick={(e) => {
-                                    //     if (loading) e.preventDefault();
-                                    // }}
+                                // onClick={(e) => {
+                                //     if (loading) e.preventDefault();
+                                // }}
                                 >Register now</Link>
                             </div>
                         </Form.Item>

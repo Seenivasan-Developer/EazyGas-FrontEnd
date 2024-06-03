@@ -14,10 +14,11 @@ import MenuItem from '@mui/material/MenuItem';
 import PropaneTankIcon from '@mui/icons-material/PropaneTank';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { authCheck } from '../Redux/authSlice';
+import { logout } from '../Redux/authSlice';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 const pages = [
-  { name: 'Book Slot', path: '/layout/bookslot' },
+  // { name: 'Book Slot', path: '/layout/bookslot' },
   { name: 'My Bookings', path: '/layout/mybookings' },
   { name: 'Home', path: '/layout/home' },
 ];
@@ -49,14 +50,14 @@ function MenuBar() {
     setAnchorElUser(null);
   };
 
-  const handleLogout = () => {
+  const handleLogout = React.useCallback(() => {
     // Clear local storage
-    localStorage.removeItem('user_data');
+    // localStorage.removeItem('user_data');
     // Update auth state
-    dispatch(authCheck(false));
+    dispatch(logout());
     // Navigate to login page
     navigate('/');
-  };
+  }, [dispatch, navigate]);
 
   return (
     <AppBar position="static">
@@ -149,8 +150,15 @@ function MenuBar() {
               </Button>
             ))}
           </Box>
-
           <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="LogOut">
+              <IconButton onClick={handleLogout} sx={{ p: 0 }}  color="inherit">
+              <PowerSettingsNewIcon />
+              </IconButton>
+            </Tooltip>
+            
+          </Box>
+          {/* <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="User">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}  color="inherit">
               <AccountCircle />
@@ -186,7 +194,7 @@ function MenuBar() {
                 </MenuItem>
               ))}
             </Menu>
-          </Box>
+          </Box> */}
         </Toolbar>
       </Container>
     </AppBar>

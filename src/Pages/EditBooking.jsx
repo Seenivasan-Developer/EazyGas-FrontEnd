@@ -23,23 +23,30 @@ const validationSchema = Yup.object({
   paymentMode: Yup.string().required('Required'),
 });
 
-const BookSlot = () => {
+const EditBooking = () => {
   const location = useLocation();
   const navigate = useNavigate();
   //useSelector((state) =>state.reducerName.SliceName)
   const [userDetails]=useSelector((state)=> state.auth.userDetail)
-  console.log(userDetails)
-  
-  const { provider } = location.state || {};
+  const [bookingData]=useSelector((state)=> state.booking.editabledata)
+  const [providerData]=useSelector((state)=> state.provider.providerdata)
 
-  if (!provider) {
-    return <div>No provider data available</div>;
+  console.log(userDetails)
+  console.log(bookingData)
+  console.log(providerData)
+  const [provider] = providerData.filter((data)=>data._id===bookingData.providerdetails.providerid);
+console.log(provider)
+  //const { bookingData } = location.state || {};
+
+
+  if (!bookingData) {
+    return <div>No Booking data available</div>;
   }
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
      const formData = {
-        providerdetails: {providername: provider.providername, providerid: provider._id},
+       providerdetails: {providername: values.providername, providerid: values.providerid},
         BookingDate: values.BookingDate,
         address: [values.doorNo, values.area, values.city, values.pincode],
         selectedSlot: values.slotTime,
@@ -53,8 +60,10 @@ const BookSlot = () => {
       };
 console.log(userDetails);
 console.log(formData)
+const formDatawithID={formData:formData,bookingid:bookingData._id};
+console.log(formDatawithID)
       // Make a POST request to your backend API endpoint
-     const res = await axios.post(`${API}/booking/newBooking`, formData);
+     const res = await axios.post(`${API}/booking/UpdateBookingByID`, formDatawithID);
 
         message.success('Booking Created Successfully');
        navigate('/layout/home');
@@ -68,17 +77,19 @@ console.log(formData)
 
 
   const initialValues = {
-    providername: provider.providername,
-    BookingDate: '',
-    slotType: '', // Added slotType field
-    slotTime: '', // Added slotTime field
-    bpNo: '',
-    gasAmount:0,
-    doorNo: '',
-    area: '',
-    city: '',
-    pincode: '',
-    paymentMode: '',
+    providername: bookingData.providerdetails.providername,
+    providerid:bookingData.providerdetails.providerid,
+    BookingDate: new Date(bookingData.BookingDate).toISOString().split('T')[0],
+    slotType: bookingData.selectedSlotType,
+    slotTime: bookingData.selectedSlot,
+    bpNo: bookingData.BPNo,
+    gasAmount:bookingData.gasAmount,
+    doorNo: bookingData.address[0],
+    area: bookingData.address[1],
+    city: bookingData.address[2],
+    pincode: bookingData.address[3],
+    paymentMode: bookingData.paymentMode,
+    DeliveryStatus:bookingData.DeliverStatus,
   };
 
   // Get today's date in YYYY-MM-DD format
@@ -93,7 +104,7 @@ const today = new Date().toISOString().split('T')[0];
     >
       {({ errors, touched, handleChange, values, setFieldValue, isSubmitting, resetForm }) => (
         <Container style={{ marginTop: "20px" }}>
-          <Typography variant="h6" align="left" gutterBottom>New Booking</Typography>
+          <Typography variant="h6" align="left" gutterBottom>Edit Booking</Typography>
           <Form>
             <Grid container spacing={2}>
              {/* Slot Section */}
@@ -288,16 +299,16 @@ const today = new Date().toISOString().split('T')[0];
                       color="primary"
                       disabled={isSubmitting}
                     >
-                      Book Now
+                      Save
                     </Button>
                     <Button
                       type="button"
                       variant="contained"
                       color="primary"
                       disabled={isSubmitting}
-                      onClick={() => resetForm()}
+                      onClick={() => navigate(-1)}
                     >
-                      Clear
+                      Back
                     </Button>
               </Grid>
 
@@ -309,4 +320,4 @@ const today = new Date().toISOString().split('T')[0];
   );
 };
 
-export default BookSlot;
+export default EditBooking;

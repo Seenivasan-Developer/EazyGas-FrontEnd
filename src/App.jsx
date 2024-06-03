@@ -10,7 +10,7 @@ import Layout from './Pages/Layout';
 import { useSelector } from 'react-redux';
 import Profile from './Pages/Profile';
 import MyBookings from './Pages/MyBookings';
-import Category from './Pages/Category';
+import EditBooking from './Pages/EditBooking';
 
 function App() { 
   //useSelector((state) =>state.reducerName.SliceName)
@@ -28,6 +28,7 @@ function App() {
           <Route path="home" element={ isAuthenticated ? <Home /> : <Navigate to="/login" replace />} />
           <Route path="bookslot" element={ isAuthenticated ? <BookSlot /> : <Navigate to="/login" replace />} />
           <Route path="mybookings" element={ isAuthenticated ? <MyBookings /> : <Navigate to="/login" replace />} />
+          <Route path="editbooking" element={ isAuthenticated ? <EditBooking /> : <Navigate to="/login" replace />} />
           <Route path="profile" element={ isAuthenticated ? <Profile /> : <Navigate to="/login" replace />} />
         </Route>
       </Routes>

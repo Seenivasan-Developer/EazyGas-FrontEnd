@@ -1,21 +1,22 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    newBookings: []
+    editabledata: []
 }
 
 const bookingSlice = createSlice({
-    name: "newBooking",
+    name: "booking",
     initialState,
     reducers: {
         // action
-        addNewBooking: (state, action) => {
-            let newBookingData = state.newBookings.push(action.payload);
-            console.log("newBookingData", newBookingData)
+        editableBooking: (state, action) => {
+            console.log(action.payload)
+            console.log(state.editabledata)
+            state.editabledata.push(action.payload);
         }
     }
 })
 
-export const {addNewBooking} = bookingSlice.actions
+export const { editableBooking } = bookingSlice.actions
 
 export default bookingSlice.reducer

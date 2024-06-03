@@ -1,64 +1,82 @@
 import React, { useEffect, useState } from 'react'
-import { jwtDecode } from 'jwt-decode';
 import Category from './Category';
-import { Typography, TextField, Container, Grid } from '@mui/material';
+import { Typography, TextField, Container, Grid, InputAdornment, CircularProgress } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import axios from 'axios';
+import { API } from '../global';
+import { useDispatch, useSelector } from 'react-redux';
+import { providerDetails } from '../Redux/providerSlice';
 
 
 function Home() {
-  const providersData = [
-    { name: 'Bharat Gas', description: 'Description 1', imageUrl: 'https://seeklogo.com/images/B/bharat-gas-logo-4CD8DBD21C-seeklogo.com.png' },
-    { name: 'HP Gas', description: 'Description 2', imageUrl: 'https://i.pinimg.com/236x/cb/bf/3f/cbbf3f1308ba8026507e487305ae61eb.jpg' },
-    { name: 'Indane Gas', description: 'Description 3', imageUrl: 'https://lh3.googleusercontent.com/p/AF1QipNW8OtJZjp-IRsmKJ18n4zWkyW4BD8IFqot7sdL=w1080-h608-p-no-v0' },
-    { name: 'Gail India', description: 'Description 4', imageUrl: 'https://seeklogo.com/images/G/gail-logo-7F9B1BEDC6-seeklogo.com.png' },
-  ];
-  const [username, setUsername] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [providers, setProviders]=useState([]);
+  const dispatch=useDispatch();
 
+  const [userDetails]=useSelector((state)=> state.auth.userDetail)
+  console.log(userDetails)
+  console.log(userDetails.userName)
+  
+  useEffect(() => {
+    // const headers = {
+    //   'x-auth-token': token,
+    //   'Content-Type': 'application/json',
+    // };
+      // Add any other headers you need
+    axios.get(`${API}/providers/getAllProviders`).then((res) => {
+      console.log(res.data);
+      setProviders(res.data);
+      dispatch(providerDetails(res.data))
+      
+  }).catch ((error)=>{
+    console.log(error)
+  });
+  }, []);
+
+ //handle the search provider
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  const filteredProviders = providersData.filter(provider =>
-    provider.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProviders = providers.filter(provider =>
+    provider.providername.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  useEffect(() => {
-    // Assuming the JWT is stored in localStorage after login
-    const token = JSON.parse(localStorage.getItem('user_data')).token;
-    //    console.log(token)
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        // Assuming the username is stored in the 'username' field of the JWT payload
-        setUsername(decodedToken.userName);
-      } catch (error) {
-        console.error('Invalid token', error);
-      }
-    }
-  }, []);
-
   return (
-    <div>
+    providers.length===0? (
+      <div className='RegisterContainer'>
+        <CircularProgress />
+        <Typography variant="h6">Loading Providers</Typography>
+      </div>
+    ) : ( <div>
       {/* <MenuBar/> */}
-      <h1>Welcome {username}</h1>
+      <Container>
+       <Typography variant="h6" align="right">Welcome {userDetails.userName}</Typography>
+       <Typography variant="h6" align="left">
+          Book Your Slot
+        </Typography>
       <TextField
         label="Search Providers"
         variant="outlined"
-        fullWidth
         margin="normal"
         value={searchTerm}
         onChange={handleSearch}
+        size='small'
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
       />
-      <Container>
-        <Typography variant="h4" align="center" gutterBottom>
-          Gas Providers
-        </Typography>
+     
         <Grid container spacing={3}>
           {filteredProviders.map((provider, index) =>
             <Category key={index} provider={provider} />)}
         </Grid>
       </Container>
-    </div>
+    </div>)
   )
 }
 
