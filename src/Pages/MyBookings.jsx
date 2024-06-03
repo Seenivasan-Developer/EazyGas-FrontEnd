@@ -42,7 +42,9 @@ const MyBookings = () => {
   const handleCancel = (booking) => {
     const bookingid = { bookingid: booking._id };
     axios.post(`${API}/booking/CancelBookingByID`, bookingid).then((res) => {
-      setBookings(prevBookings => prevBookings.filter(b => b._id !== booking._id));
+      setBookings(prevBookings => 
+        prevBookings.map(b => b._id === booking._id ? { ...b, DeliveryStatus: 'Cancelled' } : b)
+      );
     }).catch((error) => {
       console.log(error.response);
     });
@@ -115,15 +117,15 @@ const MyBookings = () => {
     return (
       <Container>
         <Typography variant="h4" gutterBottom>My Bookings</Typography>
-        <Typography variant="h5" gutterBottom>Pending Bookings</Typography>
+        <Typography variant="h5" gutterBottom>Upcoming</Typography>
         {renderBookings(pendingBookings)}
-        {pendingBookings.length === 0 && <Typography>No pending bookings.</Typography>}
+        {pendingBookings.length === 0 && <Typography>No Upcoming bookings.</Typography>}
         <Divider sx={{ my: 2 }} />
-        <Typography variant="h5" gutterBottom>Delivered Bookings</Typography>
+        <Typography variant="h5" gutterBottom>Delivered</Typography>
         {renderBookings(deliveredBookings)}
         {deliveredBookings.length === 0 && <Typography>No delivered bookings.</Typography>}
         <Divider sx={{ my: 2 }} />
-        <Typography variant="h5" gutterBottom>Cancelled Bookings</Typography>
+        <Typography variant="h5" gutterBottom>Cancelled</Typography>
         {renderBookings(cancelledBookings)}
         {cancelledBookings.length === 0 && <Typography>No cancelled bookings.</Typography>}
         
