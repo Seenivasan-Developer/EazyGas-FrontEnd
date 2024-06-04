@@ -54,7 +54,7 @@ console.log(provider)
         BPNo: values.bpNo,
         remarks: "",
         userDetails: {username: userDetails.userName, userid: userDetails.id},
-        gasAmount: values.slotType==='Preferred' ? provider.ExtraCharges+provider.gasAmount : provider.gasAmount,
+        gasAmount: provider.gasAmount,
         paymentMode: values.paymentMode,
         DeliverStatus: "Pending"
       };
@@ -94,7 +94,7 @@ console.log(formDatawithID)
     city: bookingData.address[2],
     pincode: bookingData.address[3],
     paymentMode: bookingData.paymentMode,
-    DeliveryStatus:bookingData.DeliverStatus,
+    DeliveryStatus:bookingData.DeliveryStatus,
   };
 
   // Get today's date in YYYY-MM-DD format
@@ -163,6 +163,8 @@ const today = new Date().toISOString().split('T')[0];
                     <MenuItem value="Available">Available</MenuItem>
                     <MenuItem value="Preferred">Preferred</MenuItem>
                   </Field>
+                  {values.slotType==='Preferred' ?
+                   <FormHelperText>Extra Rs {provider.ExtraCharges} charged at Delivery Time</FormHelperText>:''}
                   {touched.slotType && Boolean(errors.slotType) && (
                     <FormHelperText>{errors.slotType}</FormHelperText>
                   )}
@@ -193,8 +195,7 @@ const today = new Date().toISOString().split('T')[0];
                       ))
                     }
                   </Field>
-                  {values.slotType==='Preferred' ?
-                   <FormHelperText>Extra Rs {provider.ExtraCharges} applicable</FormHelperText>:''}
+                  
                   {touched.slotTime && Boolean(errors.slotTime) && (
                     <FormHelperText>{errors.slotTime}</FormHelperText>
                   )}
@@ -218,7 +219,7 @@ const today = new Date().toISOString().split('T')[0];
                   label="Gas Amount Rs."
                   type="number"
                   fullWidth
-                  value={values.slotType==='Preferred' ? provider.ExtraCharges+provider.gasAmount : provider.gasAmount}
+                  value={provider.gasAmount}
                   disabled
                 />
               </Grid>
@@ -277,39 +278,29 @@ const today = new Date().toISOString().split('T')[0];
                 <Divider />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
-                <FormControl fullWidth error={touched.paymentMode && Boolean(errors.paymentMode)}>
-                  <InputLabel>Payment Mode</InputLabel>
-                  <Field
-                    name="paymentMode"
-                    as={Select}
-                    value={values.paymentMode}
-                    onChange={handleChange}
-                    label="paymentMode"
-                    disabled={isSubmitting}
-                  >
-                    <MenuItem value="Cash">Cash</MenuItem>
-                    <MenuItem value="Card">Card</MenuItem>
-                    <MenuItem value="Online">Online</MenuItem>
-                  </Field>
-                  {touched.paymentMode && Boolean(errors.paymentMode) && (
-                    <FormHelperText>{errors.paymentMode}</FormHelperText>
-                  )}
-                </FormControl>
+                <Field
+                  name="paymentMode"
+                  as={TextField}
+                  label="Payment Mode"
+                  fullWidth
+                  disabled
+                />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} textAlign={'right'}>
                 {isSubmitting && <CircularProgress />}
                     <Button
                       type="submit"
                       variant="contained"
                       color="primary"
                       disabled={isSubmitting}
+                      style={{marginRight:'10px'}}
                     >
                       Save
                     </Button>
                     <Button
                       type="button"
                       variant="contained"
-                      color="primary"
+                      color="secondary"
                       disabled={isSubmitting}
                       onClick={() => navigate(-1)}
                     >

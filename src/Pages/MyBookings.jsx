@@ -98,7 +98,7 @@ const MyBookings = () => {
                 <ListItemText primary="Address" secondary={`${booking.address[0]}, ${booking.address[1]}, ${booking.address[2]}, ${booking.address[3]}`} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Payment Mode" secondary={booking.paymentMode} />
+                <ListItemText primary="Payment Type" secondary={booking.paymentMode} />
               </ListItem>
               <ListItem>
                 <ListItemText primary="Delivery Status" secondary={booking.DeliveryStatus} />

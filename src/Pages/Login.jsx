@@ -114,7 +114,7 @@ function Login() {
                     </Form.Item> */}
 
                         <Form.Item>
-                            <Button block="true" type="primary" htmlType="submit" className="login-form-button" loading={loading} disabled={loading}>
+                            <Button block="true" type="primary" htmlType="submit" className="login-form-button" loading={loading}>
                                 Log in
                             </Button>
                             <div disabled={loading} style={{ textAlign: "center", width: "100%" }}>

@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
-import { TextField, MenuItem, Button, FormControl, InputLabel, Select, Grid, FormHelperText, Container, Typography, Divider, CircularProgress } from '@mui/material';
+import {
+  TextField, MenuItem, Button, FormControl, InputLabel, Select, Grid,
+  FormHelperText, Container, Typography, Divider, CircularProgress
+} from '@mui/material';
 import * as Yup from 'yup';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { API } from '../global';
 import { message } from 'antd';
 
-// Get today's date in YYYY-MM-DD format
-
+// Define validation schema
 const validationSchema = Yup.object({
   providername: Yup.string().required('Required'),
   BookingDate: Yup.date().required('Required').min(new Date().toISOString().split('T')[0], "Booking date cannot be in the past"),
@@ -26,17 +28,17 @@ const validationSchema = Yup.object({
 const BookSlot = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  //useSelector((state) =>state.reducerName.SliceName)
-  const [userDetails]=useSelector((state)=> state.auth.userDetail)
-  console.log(userDetails)
-  const token=JSON.parse(localStorage.getItem('user_data'))
-      // Define headers
-    const headers = {
-      'Content-Type': 'application/json',
-      'x-auth-token': token.token,
-      // add other headers as needed
-    };
-    const { provider } = location.state || {};
+  const [userDetails] = useSelector((state) => state.auth.userDetail);
+  const token = JSON.parse(localStorage.getItem('user_data'));
+
+  // Define headers
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-auth-token': token.token,
+  };
+
+  // Get selected provider details
+  const { provider } = location.state || {};
 
   if (!provider) {
     return <div>No provider data available</div>;
@@ -44,42 +46,83 @@ const BookSlot = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-     const formData = {
-        providerdetails: {providername: provider.providername, providerid: provider._id},
+      if (values.paymentMode !== "Cash on Delivery") {
+        const { data } = await axios.post(`${API}/payment/order`, { amount: provider.gasAmount }, { headers });
+        console.log(data);
+        const result = await initPayment(data.data);
+        if (!result) {
+          message.error('Payment failed');
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      const formData = {
+        providerdetails: { providername: provider.providername, providerid: provider._id },
         BookingDate: values.BookingDate,
         address: [values.doorNo, values.area, values.city, values.pincode],
         selectedSlot: values.slotTime,
         selectedSlotType: values.slotType,
         BPNo: values.bpNo,
         remarks: "",
-        userDetails: {username: userDetails.userName, userid: userDetails.id},
-        gasAmount: values.slotType==='Preferred' ? provider.ExtraCharges+provider.gasAmount : provider.gasAmount,
+        userDetails: { username: userDetails.userName, userid: userDetails.id },
+        gasAmount: provider.gasAmount,
         paymentMode: values.paymentMode,
-        DeliverStatus: "Pending"
+        DeliveryStatus: "Pending"
       };
-console.log(userDetails);
-console.log(formData)
-      // Make a POST request to your backend API endpoint
-     const res = await axios.post(`${API}/booking/newBooking`, formData,{headers:headers});
 
-        message.success('Booking Created Successfully');
-       navigate('/layout/home');
+      console.log(userDetails);
+      console.log(formData);
+
+      // Make a POST request to your backend API endpoint
+      const res = await axios.post(`${API}/booking/newBooking`, formData, { headers });
+
+      message.success('Booking Created Successfully');
+      navigate('/layout/home');
     } catch (error) {
-      // Handle any errors
-      message.error('Error creating booking:', error);
+      console.log(error);
+      message.error(`Error creating booking: ${error}`);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const initPayment = (data) => {
+    return new Promise((resolve, reject) => {
+      const options = {
+        key: "rzp_test_h3obZTc9ZeZ1JS",
+        amount: data.amount,
+        currency: data.currency,
+        name: provider.providername,
+        description: "Gas Booking Transaction",
+        image: "/gas-cylinder-icon.svg",
+        order_id: data.id,
+        handler: async (response) => {
+          try {
+            const { data } = await axios.post(`${API}/payment/verify`, response, { headers });
+            console.log(data);
+            resolve(true);
+          } catch (error) {
+            console.log(error);
+            resolve(false);
+          }
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+      const rzp1 = new window.Razorpay(options);
+      rzp1.open();
+    });
+  };
 
   const initialValues = {
     providername: provider.providername,
     BookingDate: '',
-    slotType: '', // Added slotType field
-    slotTime: '', // Added slotTime field
+    slotType: '',
+    slotTime: '',
     bpNo: '',
-    gasAmount:0,
+    gasAmount: 0,
     doorNo: '',
     area: '',
     city: '',
@@ -88,8 +131,7 @@ console.log(formData)
   };
 
   // Get today's date in YYYY-MM-DD format
-const today = new Date().toISOString().split('T')[0];
-
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <Formik
@@ -102,8 +144,8 @@ const today = new Date().toISOString().split('T')[0];
           <Typography variant="h6" align="left" gutterBottom>New Booking</Typography>
           <Form>
             <Grid container spacing={2}>
-             {/* Slot Section */}
-             <Grid item xs={12}>
+              {/* Slot Section */}
+              <Grid item xs={12}>
                 <Typography variant="subtitle1" gutterBottom>Slot Details</Typography>
                 <Divider />
               </Grid>
@@ -143,7 +185,6 @@ const today = new Date().toISOString().split('T')[0];
                     as={Select}
                     value={values.slotType}
                     onChange={(e) => {
-                      // Reset slotTime when slotType changes
                       setFieldValue('slotType', e.target.value);
                       setFieldValue('slotTime', '');
                     }}
@@ -169,7 +210,6 @@ const today = new Date().toISOString().split('T')[0];
                     label={`${values.slotType} Slot Time`}
                     disabled={isSubmitting}
                   >
-                    {/* Use ternary operator to conditionally render slot times */}
                     {values.slotType === "Available" ?
                       provider.availableTimeSlots.map((slot) => (
                         <MenuItem key={slot} value={slot}>
@@ -183,8 +223,8 @@ const today = new Date().toISOString().split('T')[0];
                       ))
                     }
                   </Field>
-                  {values.slotType==='Preferred' ?
-                   <FormHelperText>Extra Rs {provider.ExtraCharges} applicable</FormHelperText>:''}
+                  {values.slotType === 'Preferred' ?
+                    <FormHelperText>Extra Rs {provider.ExtraCharges} charged at delivery time</FormHelperText> : ''}
                   {touched.slotTime && Boolean(errors.slotTime) && (
                     <FormHelperText>{errors.slotTime}</FormHelperText>
                   )}
@@ -208,7 +248,7 @@ const today = new Date().toISOString().split('T')[0];
                   label="Gas Amount Rs."
                   type="number"
                   fullWidth
-                  value={values.slotType==='Preferred' ? provider.ExtraCharges+provider.gasAmount : provider.gasAmount}
+                  value= {provider.gasAmount}
                   disabled
                 />
               </Grid>
@@ -274,39 +314,38 @@ const today = new Date().toISOString().split('T')[0];
                     as={Select}
                     value={values.paymentMode}
                     onChange={handleChange}
-                    label="paymentMode"
+                    label="Payment Mode"
                     disabled={isSubmitting}
                   >
-                    <MenuItem value="Cash">Cash</MenuItem>
-                    <MenuItem value="Card">Card</MenuItem>
-                    <MenuItem value="Online">Online</MenuItem>
-                  </Field>
+                    <MenuItem value="Cash on Delivery">Cash on Delivery</MenuItem>
+                    <MenuItem value="Pay Now">Pay Now</MenuItem>
+                 </Field>
                   {touched.paymentMode && Boolean(errors.paymentMode) && (
                     <FormHelperText>{errors.paymentMode}</FormHelperText>
                   )}
                 </FormControl>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} textAlign={'right'}>
                 {isSubmitting && <CircularProgress />}
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                      disabled={isSubmitting}
-                    >
-                      Book Now
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="contained"
-                      color="primary"
-                      disabled={isSubmitting}
-                      onClick={() => resetForm()}
-                    >
-                      Clear
-                    </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  style={{ marginRight: "10px" }}
+                >
+                  Book Now
+                </Button>
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="secondary"
+                  disabled={isSubmitting}
+                  onClick={() => resetForm()}
+                >
+                  Clear
+                </Button>
               </Grid>
-
             </Grid>
           </Form>
         </Container>

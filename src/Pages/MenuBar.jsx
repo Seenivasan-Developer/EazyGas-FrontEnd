@@ -54,6 +54,7 @@ function MenuBar() {
   const handleLogout = React.useCallback(() => {
     // Clear local storage
      localStorage.removeItem('user_data');
+     localStorage.removeItem('persist:root');
     // Update auth state
     dispatch(logout());
     persistor.purge().then(() => {
