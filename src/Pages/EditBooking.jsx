@@ -163,8 +163,8 @@ const today = new Date().toISOString().split('T')[0];
                     <MenuItem value="Available">Available</MenuItem>
                     <MenuItem value="Preferred">Preferred</MenuItem>
                   </Field>
-                  {values.slotType==='Preferred' ?
-                   <FormHelperText>Extra Rs {provider.ExtraCharges} charged at Delivery Time</FormHelperText>:''}
+                  {values.slotType === 'Preferred' ?
+                    <FormHelperText>An additional Rs {provider.ExtraCharges} will be charged at the time of delivery.</FormHelperText> : ''}
                   {touched.slotType && Boolean(errors.slotType) && (
                     <FormHelperText>{errors.slotType}</FormHelperText>
                   )}
