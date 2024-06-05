@@ -7,13 +7,17 @@ import {
   Typography,
   CircularProgress,
   Container,
-  List,
-  ListItem,
-  ListItemText,
   AccordionActions,
   Button,
   Divider,
+  Paper,
+  Grid,
 } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import axios from 'axios';
 import { API } from '../global';
@@ -22,6 +26,8 @@ import { editableBooking } from '../Redux/bookingSlice';
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState(null);
+  const [selectedBooking, setSelectedBooking]=useState(null);
+  const [confirmationOpen,setConfirmationOpen]=useState(false);
   const [userDetails] = useSelector((state) => state.auth.userDetail);
   const userId = userDetails.id;
   const navigate = useNavigate();
@@ -38,15 +44,15 @@ const MyBookings = () => {
       params: {
         userid: userId,
       },
-      headers: headers 
+      headers: headers
     }).then((res) => {
       setBookings(res.data);
     }).catch((error) => {
       console.log(error.response);
     });
-  }, [userId]); 
+  }, [userId]);
 
-  const handleCancel = (booking) => {
+ /* const handleCancel = (booking) => {
     const bookingid = { bookingid: booking._id };
     axios.post(`${API}/booking/CancelBookingByID`, bookingid,
       { headers: headers }).then((res) => {
@@ -56,12 +62,37 @@ const MyBookings = () => {
       }).catch((error) => {
         console.log(error.response);
       });
+  }*/
+  const handleCancel = (booking) => {
+    setSelectedBooking(booking);
+    setConfirmationOpen(true);
   }
 
+  const confirmCancel = () => {
+    axios.post(`${API}/booking/CancelBookingByID`, { bookingid: selectedBooking._id }, { headers: headers })
+      .then((res) => {
+        setBookings(prevBookings =>
+          prevBookings.map(b => b._id === selectedBooking._id ? { ...b, DeliveryStatus: 'Cancelled' } : b)
+        );
+      })
+      .catch((error) => {
+        console.log(error.response);
+      })
+      .finally(() => {
+        setConfirmationOpen(false);
+      });
+  }
   const handleEdit = (booking) => {
     dispatch(editableBooking(booking));
     navigate('/layout/editbooking');
   }
+
+  const [expanded, setExpanded] = useState(false);
+
+  const handleChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
+
 
   if (!bookings) {
     return (
@@ -81,37 +112,51 @@ const MyBookings = () => {
 
     const renderBookings = (bookingArray) => (
       bookingArray.map((booking) => (
-        <Accordion key={booking._id}>
+        <Accordion key={booking._id} expanded={expanded === booking._id} onChange={handleChange(booking._id)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography sx={{ width: '33%', flexShrink: 0 }}>{booking.providerdetails.providername}</Typography>
             <Typography sx={{ color: 'text.secondary' }}>Booking Date: {new Date(booking.BookingDate).toLocaleDateString()}</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <List>
-              <ListItem>
-                <ListItemText primary="Slot Time & Type" secondary={`${booking.selectedSlot} (${booking.selectedSlotType} Slot)`} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Mobile No/LPG No" secondary={booking.BPNo} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Address" secondary={`${booking.address[0]}, ${booking.address[1]}, ${booking.address[2]}, ${booking.address[3]}`} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Payment Type" secondary={booking.paymentMode} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Delivery Status" secondary={booking.DeliveryStatus} />
-              </ListItem>
-              {booking.remarks && (
-                <ListItem>
-                  <ListItemText primary="Remarks" secondary={booking.remarks} />
-                </ListItem>
-              )}
-              <ListItem>
-                <ListItemText primary="Order Reference No" secondary={booking._id} />
-              </ListItem>
-            </List>
+            <Paper elevation={2} style={{ padding: 16 }}>
+              <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={4}>
+                  <Typography>Order Reference No</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{booking._id}</Typography>
+                  <Divider variant="middle" sx={{ margin: '16px 0', backgroundColor: 'rgb(11 11 11)' }} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Typography>Slot Time & Type</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{`${booking.selectedSlot} (${booking.selectedSlotType} Slot)`}</Typography>
+                  <Divider variant="middle" sx={{ margin: '16px 10px 0 0', backgroundColor: 'rgb(11 11 11)' }} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Typography>Mobile No/LPG No</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{booking.BPNo}</Typography>
+                  <Divider variant="middle" sx={{ margin: '16px 0', backgroundColor: 'rgb(11 11 11)' }} />
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>Address</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{`${booking.address[0]}, ${booking.address[1]}, ${booking.address[2]}, ${booking.address[3]}`}</Typography>
+                  <Divider variant="middle" sx={{ margin: '16px 0', backgroundColor: 'rgb(11 11 11)' }} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Typography>Gas Amount</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{`Rs. ${booking.gasAmount}`}</Typography>
+                  <Divider variant="middle" sx={{ margin: '16px 0', backgroundColor: 'rgb(11 11 11)' }} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Typography>Payment Type</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{booking.paymentMode}</Typography>
+                  <Divider variant="middle" sx={{ margin: '16px 10px 0 0', backgroundColor: 'rgb(11 11 11)' }} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Typography>Delivery Status</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{booking.DeliveryStatus}</Typography>
+                  <Divider variant="middle" sx={{ margin: '16px 10px 0 0', backgroundColor: 'rgb(11 11 11)' }} />
+                </Grid>
+              </Grid>
+            </Paper>
           </AccordionDetails>
           {booking.DeliveryStatus === 'Pending' ?
             <AccordionActions>
@@ -136,6 +181,17 @@ const MyBookings = () => {
         <Typography variant="h5" gutterBottom>Cancelled</Typography>
         {renderBookings(cancelledBookings)}
         {cancelledBookings.length === 0 && <Typography>No cancelled bookings.</Typography>}
+
+        <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)}>
+          <DialogTitle>Confirmation</DialogTitle>
+          <DialogContent>
+            <Typography>Are you sure you want to cancel this booking?</Typography>
+          </DialogContent>
+          <DialogActions>
+          <Button onClick={confirmCancel} color="primary">Yes</Button>
+           <Button onClick={() => setConfirmationOpen(false)} color='primary'>No</Button>
+         </DialogActions>
+        </Dialog>
 
       </Container>
     );

@@ -5,9 +5,10 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API } from "../global";
 import { Paper } from "@mui/material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { authCheck, userData } from "../Redux/authSlice";
 import { jwtDecode } from "jwt-decode";
+import { replace } from "formik";
 
 const { Text } = Typography;
 
@@ -16,6 +17,14 @@ function Login() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
+    const isAuthenticated = useSelector((state) => state.auth.userAuthCheck);
+ 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/layout/home', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   
     const onFinish = async (values) => {
         // console.log(values);
@@ -33,7 +42,7 @@ function Login() {
                 try {
                     const decodedToken = jwtDecode(token);
                     dispatch(userData(decodedToken));
-                    navigate("/layout/home");
+                    navigate("/layout/home", {replace:true});
                     // console.log(decodedToken)
                 } catch (error) {
                     console.error('Invalid token', error);

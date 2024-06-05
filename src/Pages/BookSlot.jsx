@@ -10,11 +10,12 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { API } from '../global';
 import { message } from 'antd';
+import { isAfter, startOfDay } from 'date-fns';
 
 // Define validation schema
 const validationSchema = Yup.object({
   providername: Yup.string().required('Required'),
-  BookingDate: Yup.date().required('Required').min(new Date().toISOString().split('T')[0], "Booking date cannot be in the past"),
+  BookingDate: Yup.date().required('Required').min(startOfDay(new Date()), "Booking date cannot be in the past"),
   slotType: Yup.string().required('Required'),
   slotTime: Yup.string().required('Required'),
   bpNo: Yup.string().required('Required'),
@@ -30,7 +31,6 @@ const BookSlot = () => {
   const navigate = useNavigate();
   const [userDetails] = useSelector((state) => state.auth.userDetail);
   const token = JSON.parse(localStorage.getItem('user_data'));
-
   // Define headers
   const headers = {
     'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ const BookSlot = () => {
   if (!provider) {
     return <div>No provider data available</div>;
   }
-
+ 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       if (values.paymentMode !== "Cash on Delivery") {
@@ -78,7 +78,7 @@ const BookSlot = () => {
       const res = await axios.post(`${API}/booking/newBooking`, formData, { headers });
 
       message.success('Booking Created Successfully');
-      navigate('/layout/home');
+      navigate('/layout/mybookings');
     } catch (error) {
       console.log(error);
       message.error(`Error creating booking: ${error}`);
@@ -146,8 +146,8 @@ const BookSlot = () => {
             <Grid container spacing={2}>
               {/* Slot Section */}
               <Grid item xs={12}>
-                <Typography variant="subtitle1" gutterBottom>Slot Details</Typography>
-                <Divider />
+                <Divider textAlign="left"><Typography variant="subtitle1" gutterBottom>Slot Details</Typography>
+                </Divider>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
                 <Field
@@ -173,7 +173,11 @@ const BookSlot = () => {
                   inputProps={{
                     min: today, // Set minimum date to today
                   }}
-                  error={touched.BookingDate && Boolean(errors.BookingDate)}
+                  // value={values.BookingDate}
+                  // onChange={(e)=>{
+                  //   setFieldValue('BookingDate', e.target.value);
+                  // }}
+                 error={touched.BookingDate && Boolean(errors.BookingDate)}
                   helperText={touched.BookingDate && errors.BookingDate}
                 />
               </Grid>
@@ -187,6 +191,7 @@ const BookSlot = () => {
                     onChange={(e) => {
                       setFieldValue('slotType', e.target.value);
                       setFieldValue('slotTime', '');
+
                     }}
                     label='Slot Type'
                     disabled={isSubmitting}
@@ -195,7 +200,7 @@ const BookSlot = () => {
                     <MenuItem value="Preferred">Preferred</MenuItem>
                   </Field>
                   {values.slotType === 'Preferred' ?
-                    <FormHelperText>An additional Rs {provider.ExtraCharges} will be charged at the time of delivery.</FormHelperText> : ''}
+                    <FormHelperText sx={{ color: 'red' }}>An additional Rs {provider.ExtraCharges} will be charged at the time of delivery.</FormHelperText> : ''}
                   {touched.slotType && Boolean(errors.slotType) && (
                     <FormHelperText>{errors.slotType}</FormHelperText>
                   )}
@@ -241,21 +246,10 @@ const BookSlot = () => {
                   helperText={touched.bpNo && errors.bpNo}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <Field
-                  name="gasAmount"
-                  as={TextField}
-                  label="Gas Amount Rs."
-                  type="number"
-                  fullWidth
-                  value= {provider.gasAmount}
-                  disabled
-                />
-              </Grid>
               {/* Address Section */}
               <Grid item xs={12}>
-                <Typography variant="subtitle1" gutterBottom>Address Details</Typography>
-                <Divider />
+                <Divider textAlign="left"> <Typography variant="subtitle1" gutterBottom>Address Details</Typography>
+                </Divider>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Field
@@ -303,8 +297,18 @@ const BookSlot = () => {
               </Grid>
               {/* Payment Section */}
               <Grid item xs={12}>
-                <Typography variant="subtitle1" gutterBottom>Payment Details</Typography>
-                <Divider />
+                <Divider textAlign="left"><Typography variant="subtitle1" gutterBottom>Payment Details</Typography>
+                </Divider>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Field
+                  name="gasAmount"
+                  as={TextField}
+                  label="Gas Amount Rs."
+                  fullWidth
+                  value={`Rs. ${provider.gasAmount}`}
+                  disabled
+                />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
                 <FormControl fullWidth error={touched.paymentMode && Boolean(errors.paymentMode)}>
@@ -319,7 +323,7 @@ const BookSlot = () => {
                   >
                     <MenuItem value="Cash on Delivery">Cash on Delivery</MenuItem>
                     <MenuItem value="Pay Now">Pay Now</MenuItem>
-                 </Field>
+                  </Field>
                   {touched.paymentMode && Boolean(errors.paymentMode) && (
                     <FormHelperText>{errors.paymentMode}</FormHelperText>
                   )}
@@ -330,20 +334,20 @@ const BookSlot = () => {
                 <Button
                   type="submit"
                   variant="contained"
-                  color="primary"
+                  color="success"
                   disabled={isSubmitting}
                   style={{ marginRight: "10px" }}
                 >
-                  Book Now
+                  Proceed
                 </Button>
                 <Button
                   type="button"
                   variant="contained"
-                  color="secondary"
+                  color="warning"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
                 >
-                  Clear
+                  Reset
                 </Button>
               </Grid>
             </Grid>

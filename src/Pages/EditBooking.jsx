@@ -114,8 +114,8 @@ const today = new Date().toISOString().split('T')[0];
             <Grid container spacing={2}>
              {/* Slot Section */}
              <Grid item xs={12}>
-                <Typography variant="subtitle1" gutterBottom>Slot Details</Typography>
-                <Divider />
+             <Divider textAlign='left'> <Typography variant="subtitle1" gutterBottom>Slot Details</Typography>
+                </Divider>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
                 <Field
@@ -164,7 +164,7 @@ const today = new Date().toISOString().split('T')[0];
                     <MenuItem value="Preferred">Preferred</MenuItem>
                   </Field>
                   {values.slotType === 'Preferred' ?
-                    <FormHelperText>An additional Rs {provider.ExtraCharges} will be charged at the time of delivery.</FormHelperText> : ''}
+                    <FormHelperText sx={{color:'red'}}>An additional Rs {provider.ExtraCharges} will be charged at the time of delivery.</FormHelperText> : ''}
                   {touched.slotType && Boolean(errors.slotType) && (
                     <FormHelperText>{errors.slotType}</FormHelperText>
                   )}
@@ -212,21 +212,10 @@ const today = new Date().toISOString().split('T')[0];
                   helperText={touched.bpNo && errors.bpNo}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <Field
-                  name="gasAmount"
-                  as={TextField}
-                  label="Gas Amount Rs."
-                  type="number"
-                  fullWidth
-                  value={provider.gasAmount}
-                  disabled
-                />
-              </Grid>
               {/* Address Section */}
               <Grid item xs={12}>
-                <Typography variant="subtitle1" gutterBottom>Address Details</Typography>
-                <Divider />
+              <Divider textAlign='left'> <Typography variant="subtitle1" gutterBottom>Address Details</Typography>
+                </Divider>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Field
@@ -274,10 +263,20 @@ const today = new Date().toISOString().split('T')[0];
               </Grid>
               {/* Payment Section */}
               <Grid item xs={12}>
-                <Typography variant="subtitle1" gutterBottom>Payment Details</Typography>
-                <Divider />
+               <Divider textAlign='left'><Typography variant="subtitle1" gutterBottom>Payment Details</Typography>
+               </Divider> 
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+             <Grid item xs={12} sm={6} md={4}>
+                <Field
+                  name="gasAmount"
+                  as={TextField}
+                  label="Gas Amount Rs."
+                  fullWidth
+                  value={`Rs. ${provider.gasAmount}`}
+                  disabled
+                />
+              </Grid>
+             <Grid item xs={12} sm={6} md={4}>
                 <Field
                   name="paymentMode"
                   as={TextField}
@@ -291,7 +290,7 @@ const today = new Date().toISOString().split('T')[0];
                     <Button
                       type="submit"
                       variant="contained"
-                      color="primary"
+                      color="success"
                       disabled={isSubmitting}
                       style={{marginRight:'10px'}}
                     >
@@ -300,7 +299,7 @@ const today = new Date().toISOString().split('T')[0];
                     <Button
                       type="button"
                       variant="contained"
-                      color="secondary"
+                      color="warning"
                       disabled={isSubmitting}
                       onClick={() => navigate(-1)}
                     >
